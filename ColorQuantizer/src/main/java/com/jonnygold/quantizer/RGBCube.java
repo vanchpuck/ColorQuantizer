@@ -10,21 +10,79 @@ public class RGBCube {
 		
 	private static class Quantizer {
 		
-		private Comparator<RGBColor> rComparator = new Comparator<RGBColor>() {
+		private static final int RED_QUANTIZE_BOUND = 80;
+		private static final int GREEN_QUANTIZE_BOUND = 80;
+		private static final int BLUE_QUANTIZE_BOUND = 100;
+		
+		private final class CubeDimension {
+			private int rDim, gDim, bDim, maxDim;
+			
+			public CubeDimension(int rDim, int gDim, int bDim){
+				this.rDim = rDim;
+				this.gDim = gDim;
+				this.bDim = bDim;
+				
+				if(rDim >= gDim && rDim >= bDim)
+					maxDim = rDim;
+				else if(gDim >= rDim && rDim >= bDim) 
+					maxDim = gDim;
+				else 
+					maxDim = bDim;
+			}
+			
+			public int getRedDim() {
+				return rDim;
+			}
+			
+			public int getGreenDim() {
+				return gDim;
+			}
+			
+			public int getBlueDim() {
+				return bDim;
+			}
+			
+			public int getMaxDim() {
+				return maxDim;
+			}
+			
+			public Comparator<RGBColor> getComparator(){
+				if(maxDim == rDim) {
+					return RED_COMPARATOR;
+				} else if(maxDim == gDim) {
+					return GREEN_COMPARATOR;
+				} else {
+					return BLUE_COMPARATOR;
+				}
+			}
+			
+			public boolean isQuantized(){
+				if(maxDim == rDim && maxDim > RED_QUANTIZE_BOUND) {
+					return true;
+				} else if(maxDim == gDim  && maxDim > GREEN_QUANTIZE_BOUND) {
+					return true;
+				} else if(maxDim == bDim  && maxDim > BLUE_QUANTIZE_BOUND){
+					return true;
+				}
+				return false;
+			}
+		}
+				
+		private static final Comparator<RGBColor> RED_COMPARATOR = new Comparator<RGBColor>() {
 			@Override
 			public int compare(RGBColor color1, RGBColor color2) {
 				return Integer.compare(color1.getRed(), color2.getRed());
 			}
 		};
 		
-		private Comparator<RGBColor> gComparator = new Comparator<RGBColor>() {
+		private static final Comparator<RGBColor> GREEN_COMPARATOR = new Comparator<RGBColor>() {
 			@Override
 			public int compare(RGBColor color1, RGBColor color2) {
 				return Integer.compare(color1.getGreen(), color2.getGreen());
 			}
 		};
 		
-		private Comparator<RGBColor> bComparator = new Comparator<RGBColor>() {
+		private static final Comparator<RGBColor> BLUE_COMPARATOR = new Comparator<RGBColor>() {
 			@Override
 			public int compare(RGBColor color1, RGBColor color2) {
 				return Integer.compare(color1.getBlue(), color2.getBlue());
@@ -54,7 +112,12 @@ public class RGBCube {
 				mainColors.add(getCenter(colors, from, to));
 				return;
 			}
-			Arrays.sort(colors, from, to, getComparator(colors, from, to));
+			CubeDimension dim = getCubeDimension(colors, from, to);
+			if(!dim.isQuantized()){
+				mainColors.add(getCenter(colors, from, to));
+				return;
+			}
+			Arrays.sort(colors, from, to, dim.getComparator());
 			int medianIdx = findMedianIdx(colors, from, to);
 			quantize(colors, from, medianIdx, currLevel+1, maxLevel);
 			quantize(colors, medianIdx, to, currLevel+1, maxLevel);
@@ -77,55 +140,39 @@ public class RGBCube {
 			return medianIdx+1;
 		}
 		
-		private int[] getCubeBorders(RGBColor[] colors, int from, int to){
-			int[] borders = new int[6];
+		private CubeDimension getCubeDimension(RGBColor[] colors, int from, int to){
 			int currR, currG, currB;
-			borders[0] = borders[1] = colors[from].getRed();
-			borders[2] = borders[3] = colors[from].getGreen();
-			borders[4] = borders[5] = colors[from].getBlue();
+			int minR, maxR, minG, maxG, minB, maxB;
+			minR = maxR = colors[from].getRed();
+			minG = maxG = colors[from].getGreen();
+			minB = maxB = colors[from].getBlue();
 			for(int i=from+1; i<to; i++) {
 				currR = colors[i].getRed();
 				currG = colors[i].getGreen();
 				currB = colors[i].getBlue();
-				if(currR < borders[0]){
-					borders[0] = currR;
-				} else if(currR > borders[1]) {
-					borders[1] = currR;
+				if(currR < minR){
+					minR = currR;
+				} else if(currR > maxR) {
+					maxR = currR;
 				}
-				if(currG < borders[2]){
-					borders[2] = currG;
-				} else if(currG > borders[3]) {
-					borders[3] = currG;
+				if(currG < minG){
+					minG = currG;
+				} else if(currG > maxG) {
+					maxG = currG;
 				}
-				if(currB < borders[4]){
-					borders[4] = currB;
-				} else if(currB > borders[5]) {
-					borders[5] = currB;
+				if(currB < minB){
+					minB = currB;
+				} else if(currB > maxB) {
+					maxB = currB;
 				}
 			}
-			return borders;
+			return new CubeDimension(maxR - minR, maxG - minG, maxB - minB);
 		}
-		
-		private Comparator<RGBColor> getComparator(RGBColor[] colors, int from, int to){
-			int[] borders = getCubeBorders(colors, from, to);
-			int rLen = borders[1] - borders[0];
-			int gLen = borders[3] - borders[2];
-			int bLen = borders[5] - borders[4];
-			if(rLen >= gLen && rLen >= bLen)
-				return rComparator;
-			else if(gLen >= rLen && rLen >= bLen) 
-				return gComparator;
-			else 
-				return bComparator;
-		}
-		
+
 		private RGBColor getCenter(RGBColor[] colors, int from, int to){
 			double colorsCount = getColorsCount(colors, from, to);
 			double rCenter = 0, gCenter = 0, bCenter = 0;
 			for(int i=from; i<to; i++){
-				int c = data.get(colors[i]);
-				int r = colors[i].getGreen();
-				double k = data.get(colors[i])/colorsCount;
 				rCenter += data.get(colors[i])/colorsCount*colors[i].getRed();
 				gCenter += data.get(colors[i])/colorsCount*colors[i].getGreen();
 				bCenter += data.get(colors[i])/colorsCount*colors[i].getBlue();
