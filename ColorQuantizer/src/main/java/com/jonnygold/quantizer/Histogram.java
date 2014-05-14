@@ -5,33 +5,46 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Histogram implements IsHistogram {
-
-//	private List<RGBColor> colors = new ArrayList<RGBColor>();
+		
+	public static class Builder{
+		
+		private Map<RGBColor, Integer> builderData = new HashMap<RGBColor, Integer>();
+		
+		public Builder addColor(RGBColor color){
+			if(builderData.containsKey(color)) {
+				builderData.put(color, builderData.get(color)+1 );
+			} else {
+				builderData.put(color, 1);
+			}
+			return this;
+		}
+		
+		public Histogram build(){
+			return new Histogram(new HashMap<>(builderData));
+		}
+	}
+	
 	
 	private Map<RGBColor, Integer> data = new HashMap<RGBColor, Integer>();
+	
+	
+	private Histogram(Map<RGBColor, Integer> builderData){
+		data = builderData;
+	}
 	
 	@Override
 	public Collection<RGBColor> getColors() {
 		return data.keySet();
 	}
-
-	@Override
-	public int getCount(RGBColor color) {
-		return data.get(color);
-	}
-
+	
 	@Override
 	public Map<RGBColor, Integer> getData() {
 		return new HashMap<RGBColor, Integer>(data);
 	}
-
+	
 	@Override
-	public void addColor(RGBColor color) {
-		if(data.containsKey(color)){
-			data.put(color, data.get(color)+1);
-		} else{
-			data.put(color, 1);
-		}
+	public int getCount(RGBColor color) {
+		return data.get(color);
 	}
 
 	@Override
@@ -39,4 +52,13 @@ public class Histogram implements IsHistogram {
 		return data.containsKey(color);
 	}
 
+	@Override
+	public int size() {
+		return data.size();
+	}
+	
+	@Override
+	public String toString() {
+		return getData().toString();
+	}
 }

@@ -11,8 +11,8 @@ public interface IsHistogram {
 	
 	public Map<RGBColor, Integer> getData();
 	
-	public void addColor(RGBColor color);
-	
 	public boolean containsColor(RGBColor color);
+	
+	public int size();
 	
 }
