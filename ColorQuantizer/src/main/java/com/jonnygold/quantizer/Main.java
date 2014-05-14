@@ -29,7 +29,7 @@ public class Main extends JFrame {
 		
 		RGBCube c = getCube();
 		
-		Collection<RGBColor> colors = c.quantize(2);
+		Collection<RGBColor> colors = c.quantize(3);
 		for(RGBColor color : colors){
 			add(new ImagePanel(new FlowLayout(FlowLayout.CENTER), new Color(color.getRed(), color.getGreen(), color.getBlue())));
 		}
@@ -41,15 +41,15 @@ public class Main extends JFrame {
 	}
 	
 	private RGBCube getCube() throws IOException{
-		BufferedImage img = ImageIO.read(new File("/home/izolotov/Downloads/Calendar/belirussia.jpg"));
+		BufferedImage img = ImageIO.read(new File("C:\\Users\\Vanchpuck\\Pictures\\images (38).jpg"));
 		
 		Histogram.Builder b = new Histogram.Builder();
 		
 		int[] p = new int[3];
 		
-		for(int y=0; y<img.getHeight(); y++){
-			for(int x=0; x<img.getWidth(); x++){
-				p = img.getRaster().getPixel(y, x, p);
+		for(int x=0; x<img.getRaster().getWidth(); x++){
+			for(int y=0; y<img.getRaster().getHeight(); y++){
+				p = img.getRaster().getPixel(x, y, p);
 				b.addColor(new RGBColor(p[0], p[1], p[2]));
 			}
 		}

@@ -47,7 +47,8 @@ public class RGBCube {
 		
 		private void quantize(RGBColor[] colors, int from, int to, int currLevel, int maxLevel){
 			if(from == to){
-				throw new IllegalArgumentException("Невозможно квантовать куб нулевой размерности.");
+				//throw new IllegalArgumentException("Невозможно квантовать куб нулевой размерности.");
+				return;
 			}
 			if(currLevel >= maxLevel || to-from==1){
 				mainColors.add(getCenter(colors, from, to));
@@ -119,8 +120,25 @@ public class RGBCube {
 		}
 		
 		private RGBColor getCenter(RGBColor[] colors, int from, int to){
-			int[] borders = getCubeBorders(colors, from, to);
-			return new RGBColor((borders[1] + borders[0])>>1, (borders[3] + borders[2])>>1, (borders[5] + borders[4])>>1);
+			double colorsCount = getColorsCount(colors, from, to);
+			double rCenter = 0, gCenter = 0, bCenter = 0;
+			for(int i=from; i<to; i++){
+				int c = data.get(colors[i]);
+				int r = colors[i].getGreen();
+				double k = data.get(colors[i])/colorsCount;
+				rCenter += data.get(colors[i])/colorsCount*colors[i].getRed();
+				gCenter += data.get(colors[i])/colorsCount*colors[i].getGreen();
+				bCenter += data.get(colors[i])/colorsCount*colors[i].getBlue();
+			}
+			return new RGBColor((int)rCenter, (int)gCenter, (int)bCenter);
+		}
+		
+		private int getColorsCount(RGBColor[] colors, int from, int to){
+			int counter = 0;
+			for(int i=from; i<to; i++){
+				counter += data.get(colors[i]);
+			}
+			return counter;
 		}
 		
 		private RGBColor[] getColorsArray() {
