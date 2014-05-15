@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class RGBCube {
 		
@@ -46,7 +48,7 @@ public class RGBCube {
 				return maxDim;
 			}
 			
-			public Comparator<RGBColor> getComparator(){
+			public Comparator<IsRGBColor> getComparator(){
 				if(maxDim == rDim) {
 					return RED_COMPARATOR;
 				} else if(maxDim == gDim) {
@@ -68,42 +70,42 @@ public class RGBCube {
 			}
 		}
 				
-		private static final Comparator<RGBColor> RED_COMPARATOR = new Comparator<RGBColor>() {
+		private static final Comparator<IsRGBColor> RED_COMPARATOR = new Comparator<IsRGBColor>() {
 			@Override
-			public int compare(RGBColor color1, RGBColor color2) {
+			public int compare(IsRGBColor color1, IsRGBColor color2) {
 				return Integer.compare(color1.getRed(), color2.getRed());
 			}
 		};
 		
-		private static final Comparator<RGBColor> GREEN_COMPARATOR = new Comparator<RGBColor>() {
+		private static final Comparator<IsRGBColor> GREEN_COMPARATOR = new Comparator<IsRGBColor>() {
 			@Override
-			public int compare(RGBColor color1, RGBColor color2) {
+			public int compare(IsRGBColor color1, IsRGBColor color2) {
 				return Integer.compare(color1.getGreen(), color2.getGreen());
 			}
 		};
 		
-		private static final Comparator<RGBColor> BLUE_COMPARATOR = new Comparator<RGBColor>() {
+		private static final Comparator<IsRGBColor> BLUE_COMPARATOR = new Comparator<IsRGBColor>() {
 			@Override
-			public int compare(RGBColor color1, RGBColor color2) {
+			public int compare(IsRGBColor color1, IsRGBColor color2) {
 				return Integer.compare(color1.getBlue(), color2.getBlue());
 			}
 		};
 		
 		Map<RGBColor, Integer> data;
 		
-		private Collection<RGBColor> mainColors = new ArrayList<RGBColor>();
+		private Set<IsRGBColor> mainColors = new HashSet<IsRGBColor>();
 		
 		Quantizer(IsHistogram histogram){
 			data = histogram.getData();
 		}
 		
-		public Collection<RGBColor> quantize(int level){
-			RGBColor[] colors = getColorsArray();
+		public Collection<IsRGBColor> quantize(int level){
+			IsRGBColor[] colors = getColorsArray();
 			quantize(colors, 0, colors.length, 0, level);
 			return mainColors;
 		}
 		
-		private void quantize(RGBColor[] colors, int from, int to, int currLevel, int maxLevel){
+		private void quantize(IsRGBColor[] colors, int from, int to, int currLevel, int maxLevel){
 			if(from == to){
 				//throw new IllegalArgumentException("Невозможно квантовать куб нулевой размерности.");
 				return;
@@ -123,7 +125,7 @@ public class RGBCube {
 			quantize(colors, medianIdx, to, currLevel+1, maxLevel);
 		}
 		
-		private int findMedianIdx(RGBColor[] colors, int from, int to){
+		private int findMedianIdx(IsRGBColor[] colors, int from, int to){
 			int totalSum = 0;
 			int medianIdx = from;
 			
@@ -140,7 +142,7 @@ public class RGBCube {
 			return medianIdx+1;
 		}
 		
-		private CubeDimension getCubeDimension(RGBColor[] colors, int from, int to){
+		private CubeDimension getCubeDimension(IsRGBColor[] colors, int from, int to){
 			int currR, currG, currB;
 			int minR, maxR, minG, maxG, minB, maxB;
 			minR = maxR = colors[from].getRed();
@@ -169,7 +171,7 @@ public class RGBCube {
 			return new CubeDimension(maxR - minR, maxG - minG, maxB - minB);
 		}
 
-		private RGBColor getCenter(RGBColor[] colors, int from, int to){
+		private IsRGBColor getCenter(IsRGBColor[] colors, int from, int to){
 			double colorsCount = getColorsCount(colors, from, to);
 			double rCenter = 0, gCenter = 0, bCenter = 0;
 			for(int i=from; i<to; i++){
@@ -180,7 +182,7 @@ public class RGBCube {
 			return new RGBColor((int)rCenter, (int)gCenter, (int)bCenter);
 		}
 		
-		private int getColorsCount(RGBColor[] colors, int from, int to){
+		private int getColorsCount(IsRGBColor[] colors, int from, int to){
 			int counter = 0;
 			for(int i=from; i<to; i++){
 				counter += data.get(colors[i]);
@@ -188,10 +190,10 @@ public class RGBCube {
 			return counter;
 		}
 		
-		private RGBColor[] getColorsArray() {
-			RGBColor[] array = new RGBColor[data.size()];
+		private IsRGBColor[] getColorsArray() {
+			IsRGBColor[] array = new RGBColor[data.size()];
 			int idx = 0;
-			for(RGBColor color : data.keySet()){
+			for(IsRGBColor color : data.keySet()){
 				array[idx] = color;
 				idx++;
 			}
@@ -206,7 +208,7 @@ public class RGBCube {
 		this.histogram = histogram;
 	}
 	
-	public Collection<RGBColor> quantize(int level){
+	public Collection<IsRGBColor> quantize(int level){
 		return new Quantizer(histogram).quantize(level);
 	}
 		

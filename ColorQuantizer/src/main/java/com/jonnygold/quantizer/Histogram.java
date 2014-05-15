@@ -20,7 +20,17 @@ public class Histogram implements IsHistogram {
 		}
 		
 		public Histogram build(){
-			return new Histogram(new HashMap<>(builderData));
+			Map<RGBColor, Integer> newMap = new HashMap<RGBColor, Integer>();
+			int sum = 0;
+			for(RGBColor color : builderData.keySet()){
+				sum+=builderData.get(color);
+			}
+			for(RGBColor color : builderData.keySet()){
+				if(builderData.get(color) > 1340){
+					newMap.put(color, builderData.get(color));
+				}
+			}
+			return new Histogram(new HashMap<>(newMap));
 		}
 	}
 	

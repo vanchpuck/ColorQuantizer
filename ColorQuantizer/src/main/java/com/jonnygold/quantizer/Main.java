@@ -29,8 +29,8 @@ public class Main extends JFrame {
 		
 		RGBCube c = getCube();
 		
-		Collection<RGBColor> colors = c.quantize(5);
-		for(RGBColor color : colors){
+		Collection<IsRGBColor> colors = c.quantize(5);
+		for(IsRGBColor color : colors){
 			add(new ImagePanel(new FlowLayout(FlowLayout.CENTER), new Color(color.getRed(), color.getGreen(), color.getBlue())));
 		}
 		
@@ -41,7 +41,7 @@ public class Main extends JFrame {
 	}
 	
 	private RGBCube getCube() throws IOException{
-		BufferedImage img = ImageIO.read(new File("C:\\Users\\Vanchpuck\\Pictures\\flag_kaz.jpg"));
+		BufferedImage img = ImageIO.read(new File("C:\\Users\\Vanchpuck\\Pictures\\flag_rus.jpg"));
 		
 		Histogram.Builder b = new Histogram.Builder();
 		
