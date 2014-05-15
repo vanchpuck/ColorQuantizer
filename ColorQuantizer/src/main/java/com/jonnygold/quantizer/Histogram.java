@@ -2,10 +2,11 @@ package com.jonnygold.quantizer;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class Histogram implements IsHistogram {
-		
+	
 	public static class Builder{
 		
 		private Map<RGBColor, Integer> builderData = new HashMap<RGBColor, Integer>();
@@ -20,17 +21,37 @@ public class Histogram implements IsHistogram {
 		}
 		
 		public Histogram build(){
-			Map<RGBColor, Integer> newMap = new HashMap<RGBColor, Integer>();
-			int sum = 0;
-			for(RGBColor color : builderData.keySet()){
-				sum+=builderData.get(color);
-			}
-			for(RGBColor color : builderData.keySet()){
-				if(builderData.get(color) > 1340){
-					newMap.put(color, builderData.get(color));
+			return new Histogram(new HashMap<>(builderData));
+		}
+		
+		public Histogram build(int bound) {
+			Map<RGBColor, Integer> data = new HashMap<RGBColor, Integer>(builderData);
+			
+			RGBColor color = null;
+			for(Iterator<RGBColor> iter = data.keySet().iterator(); iter.hasNext(); ){
+				color = iter.next();
+				if(data.get(color) <= bound){
+					iter.remove();;
 				}
 			}
-			return new Histogram(new HashMap<>(newMap));
+			return new Histogram(data);
+		}
+		
+		public Histogram build(double bound) {
+			Map<RGBColor, Integer> data = new HashMap<RGBColor, Integer>(builderData);
+			
+			int sum = 0;
+			for(RGBColor color : data.keySet()){
+				sum+=data.get(color);
+			}
+			RGBColor color = null;			
+			for(Iterator<RGBColor> iter = data.keySet().iterator(); iter.hasNext(); ){
+				color = iter.next();
+				if((double)data.get(color)/(double)sum <= bound){
+					iter.remove();;
+				}
+			}
+			return new Histogram(data);
 		}
 	}
 	

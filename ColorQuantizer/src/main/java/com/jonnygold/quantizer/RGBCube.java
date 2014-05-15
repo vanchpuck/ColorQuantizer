@@ -12,9 +12,9 @@ public class RGBCube {
 		
 	private static class Quantizer {
 		
-		private static final int RED_QUANTIZE_BOUND = 80;
-		private static final int GREEN_QUANTIZE_BOUND = 80;
-		private static final int BLUE_QUANTIZE_BOUND = 100;
+		private static final int RED_QUANTIZE_BOUND = 60;
+		private static final int GREEN_QUANTIZE_BOUND = 60;
+		private static final int BLUE_QUANTIZE_BOUND = 90;
 		
 		private final class CubeDimension {
 			private int rDim, gDim, bDim, maxDim;
@@ -123,6 +123,10 @@ public class RGBCube {
 			int medianIdx = findMedianIdx(colors, from, to);
 			quantize(colors, from, medianIdx, currLevel+1, maxLevel);
 			quantize(colors, medianIdx, to, currLevel+1, maxLevel);
+		}
+		
+		private int findSplitIdx(IsRGBColor[] colors, int from, int to){
+			
 		}
 		
 		private int findMedianIdx(IsRGBColor[] colors, int from, int to){

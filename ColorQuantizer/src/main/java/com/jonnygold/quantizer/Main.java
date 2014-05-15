@@ -27,9 +27,10 @@ public class Main extends JFrame {
 		
 		setLayout(new FlowLayout(FlowLayout.CENTER));
 		
-		RGBCube c = getCube();
+		Quantizer q = new Quantizer();
 		
-		Collection<IsRGBColor> colors = c.quantize(5);
+		
+		Collection<RGBColor> colors = q.quantize(getHist(), 3);
 		for(IsRGBColor color : colors){
 			add(new ImagePanel(new FlowLayout(FlowLayout.CENTER), new Color(color.getRed(), color.getGreen(), color.getBlue())));
 		}
@@ -40,21 +41,22 @@ public class Main extends JFrame {
 		setVisible(true);
 	}
 	
-	private RGBCube getCube() throws IOException{
-		BufferedImage img = ImageIO.read(new File("C:\\Users\\Vanchpuck\\Pictures\\flag_rus.jpg"));
+	private IsHistogram getHist() throws IOException{
+//		BufferedImage img = ImageIO.read(new File("/home/izolotov/Downloads/На календарь/kaz.jpg"));
+//		BufferedImage img = ImageIO.read(new File("/home/izolotov/Downloads/Calendar/ukrane.jpg"));
+		BufferedImage img = ImageIO.read(new File("/home/izolotov/Desktop/rus.jpg"));
 		
 		Histogram.Builder b = new Histogram.Builder();
 		
 		int[] p = new int[3];
 		
-		for(int x=0; x<img.getRaster().getWidth(); x++){
-			for(int y=0; y<img.getRaster().getHeight(); y++){
+		for(int x=0; x<img.getWidth(); x++){
+			for(int y=0; y<img.getHeight(); y++){
 				p = img.getRaster().getPixel(x, y, p);
 				b.addColor(new RGBColor(p[0], p[1], p[2]));
 			}
 		}
-		
-		return new RGBCube(b.build());
+		return b.build(0.0001);
 	}
 	
 	public static void main(String[] args) throws IOException {
