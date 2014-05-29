@@ -7,6 +7,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.imageio.ImageIO;
 import javax.net.ssl.HostnameVerifier;
@@ -19,6 +24,15 @@ public class Main extends JFrame {
 	 */
 	private static final long serialVersionUID = -8903441595017639323L;
 
+	private static Comparator<Map.Entry<RGBColor, Integer>> compar = new Comparator<Map.Entry<RGBColor,Integer>>() {
+
+		@Override
+		public int compare(Entry<RGBColor, Integer> o1, Entry<RGBColor, Integer> o2) {
+			return -Integer.compare(o1.getValue(), o2.getValue());
+		}
+		
+	};
+	
 	public Main() throws IOException{
 		super("Quantizer");
 		
@@ -30,9 +44,18 @@ public class Main extends JFrame {
 		Quantizer q = new Quantizer();
 		
 		
-		Collection<RGBColor> colors = q.quantize(getHist(), 3);
-		for(IsRGBColor color : colors){
-			add(new ImagePanel(new FlowLayout(FlowLayout.CENTER), new Color(color.getRed(), color.getGreen(), color.getBlue())));
+		IsHistogram hist = q.quantize(getHist(), 3);
+		
+		TreeSet<Map.Entry<RGBColor, Integer>> set = new TreeSet<Map.Entry<RGBColor, Integer>>(compar);
+		set.addAll( hist.getData().entrySet());
+		
+		int idx = 0;
+		for(Map.Entry<RGBColor, Integer> bar : set){
+			if(idx > 5){
+				break;
+			}
+			add(new ImagePanel(new FlowLayout(FlowLayout.CENTER), new Color(bar.getKey().getRed(), bar.getKey().getGreen(), bar.getKey().getBlue())));
+			idx++;
 		}
 		
 //		add(new ImagePanel(new FlowLayout(FlowLayout.CENTER), Color.GREEN));
@@ -44,7 +67,7 @@ public class Main extends JFrame {
 	private IsHistogram getHist() throws IOException{
 //		BufferedImage img = ImageIO.read(new File("/home/izolotov/Downloads/На календарь/kaz.jpg"));
 //		BufferedImage img = ImageIO.read(new File("/home/izolotov/Downloads/Calendar/ukrane.jpg"));
-		BufferedImage img = ImageIO.read(new File("/home/izolotov/Desktop/rus.jpg"));
+		BufferedImage img = ImageIO.read(new File("/home/izolotov/Desktop/index.jpg"));
 		
 		Histogram.Builder b = new Histogram.Builder();
 		

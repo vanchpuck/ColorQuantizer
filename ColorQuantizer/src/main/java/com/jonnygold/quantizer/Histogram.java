@@ -20,6 +20,15 @@ public class Histogram implements IsHistogram {
 			return this;
 		}
 		
+		public Builder addColor(RGBColor color, int count){
+			if(builderData.containsKey(color)) {
+				builderData.put(color, builderData.get(color)+count );
+			} else {
+				builderData.put(color, count);
+			}
+			return this;
+		}
+		
 		public Histogram build(){
 			return new Histogram(new HashMap<>(builderData));
 		}
@@ -56,7 +65,7 @@ public class Histogram implements IsHistogram {
 	}
 	
 	
-	private Map<RGBColor, Integer> data = new HashMap<RGBColor, Integer>();
+	private Map<RGBColor, Integer> data;
 	
 	
 	private Histogram(Map<RGBColor, Integer> builderData){

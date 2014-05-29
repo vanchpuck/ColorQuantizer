@@ -214,7 +214,7 @@ public class Quantizer {
 			Arrays.sort(data, from, to, cubeAxis.getComparator());
 		}
 		
-		private int getColorsCount(){
+		public int getColorsCount(){
 			int counter = 0;
 			for(int i=from; i<to; i++){
 				counter += histogramData.get(data[i]);
@@ -268,32 +268,32 @@ public class Quantizer {
 //	
 //	private RGBColor[] colors;
 	
-	public Collection<RGBColor> quantize(IsHistogram histogram, int level){
+	public IsHistogram quantize(IsHistogram histogram, int level){
 		
 		histogramData = histogram.getData();
 		
-		return quantize(new ArrayList<RGBColor>(), getColorsArray(histogramData), 0, histogramData.size(), 0, level);
+		return quantize(new Histogram.Builder(), getColorsArray(histogramData), 0, histogramData.size(), 0, level).build();
 				
 	}
 	
-	private Collection<RGBColor> quantize(Collection<RGBColor> palette, RGBColor[] colors, int from, int to, int currLevel, int maxLevel){
+	private Histogram.Builder quantize(Histogram.Builder builder, RGBColor[] colors, int from, int to, int currLevel, int maxLevel){
 		if(from == to){
-			return palette;
+			return builder;
 		}
 		
 		RGBCube cube = new RGBCube(colors, from, to);
 		
 		if(currLevel >= maxLevel || to-from==1 || !cube.isQuantized()){
-			palette.add(cube.getCentroid());
-			return palette;
+			builder.addColor(cube.getCentroid(), cube.getColorsCount());
+			return builder;
 		}
 		
 		int splitIdx = cube.findSplitIdx();
 		
-		quantize(palette, colors, from, splitIdx, currLevel+1, maxLevel);
-		quantize(palette, colors, splitIdx, to, currLevel+1, maxLevel);
+		quantize(builder, colors, from, splitIdx, currLevel+1, maxLevel);
+		quantize(builder, colors, splitIdx, to, currLevel+1, maxLevel);
 		
-		return palette;
+		return builder;
 	}
 	
 	private RGBColor[] getColorsArray(Map<RGBColor, Integer> data) {
