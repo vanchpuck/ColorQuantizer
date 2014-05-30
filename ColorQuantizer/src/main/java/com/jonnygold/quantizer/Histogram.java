@@ -7,24 +7,56 @@ import java.util.Map;
 
 public class Histogram implements IsHistogram {
 	
+	public static class Bar {
+		
+		private RGBColor color;
+		
+		private int count;
+		
+		public Bar(RGBColor color, int count) {
+			this.color = color;
+			this.count = count;
+		}
+		
+		public RGBColor getColor() {
+			return color;
+		}
+		
+		public int getCount() {
+			return count;
+		}
+		
+		public void setColor(RGBColor color) {
+			this.color = color;
+		}
+		
+		public void setCount(int count) {
+			if(count < 0){
+				throw new IllegalArgumentException("Colors count should be greater than 0");
+			}
+			this.count = count;
+		}
+				
+	}
+	
 	public static class Builder{
 		
-		private Map<RGBColor, Integer> builderData = new HashMap<RGBColor, Integer>();
+		private Map<RGBColor, Bar> builderData = new HashMap<RGBColor, Bar>();
 		
 		public Builder addColor(RGBColor color){
 			if(builderData.containsKey(color)) {
-				builderData.put(color, builderData.get(color)+1 );
+				builderData.get(color).setCount(builderData.get(color).getCount()+1);
 			} else {
-				builderData.put(color, 1);
+				builderData.put(color, new Bar(color, 1));
 			}
 			return this;
 		}
 		
 		public Builder addColor(RGBColor color, int count){
 			if(builderData.containsKey(color)) {
-				builderData.put(color, builderData.get(color)+count );
+				builderData.get(color).setCount(builderData.get(color).getCount()+count);
 			} else {
-				builderData.put(color, count);
+				builderData.put(color, new Bar(color, count));
 			}
 			return this;
 		}
@@ -34,12 +66,12 @@ public class Histogram implements IsHistogram {
 		}
 		
 		public Histogram build(int bound) {
-			Map<RGBColor, Integer> data = new HashMap<RGBColor, Integer>(builderData);
+			Map<RGBColor, Bar> data = new HashMap<RGBColor, Bar>(builderData);
 			
 			RGBColor color = null;
 			for(Iterator<RGBColor> iter = data.keySet().iterator(); iter.hasNext(); ){
 				color = iter.next();
-				if(data.get(color) <= bound){
+				if(data.get(color).getCount() <= bound){
 					iter.remove();;
 				}
 			}
@@ -47,16 +79,16 @@ public class Histogram implements IsHistogram {
 		}
 		
 		public Histogram build(double bound) {
-			Map<RGBColor, Integer> data = new HashMap<RGBColor, Integer>(builderData);
+			Map<RGBColor, Bar> data = new HashMap<RGBColor, Bar>(builderData);
 			
 			int sum = 0;
 			for(RGBColor color : data.keySet()){
-				sum+=data.get(color);
+				sum+=data.get(color).getCount();
 			}
 			RGBColor color = null;			
 			for(Iterator<RGBColor> iter = data.keySet().iterator(); iter.hasNext(); ){
 				color = iter.next();
-				if((double)data.get(color)/(double)sum <= bound){
+				if((double)data.get(color).getCount()/(double)sum <= bound){
 					iter.remove();;
 				}
 			}
@@ -65,10 +97,10 @@ public class Histogram implements IsHistogram {
 	}
 	
 	
-	private Map<RGBColor, Integer> data;
+	private Map<RGBColor, Bar> data;
 	
 	
-	private Histogram(Map<RGBColor, Integer> builderData){
+	private Histogram(Map<RGBColor, Bar> builderData){
 		data = builderData;
 	}
 	
@@ -79,12 +111,16 @@ public class Histogram implements IsHistogram {
 	
 	@Override
 	public Map<RGBColor, Integer> getData() {
-		return new HashMap<RGBColor, Integer>(data);
+		Map<RGBColor, Integer> result = new HashMap<>(data.size());
+		for(Map.Entry<RGBColor, Bar> entry : data.entrySet()){
+			result.put(entry.getKey(), entry.getValue().getCount());
+		}
+		return result;
 	}
 	
 	@Override
 	public int getCount(RGBColor color) {
-		return data.get(color);
+		return data.get(color).getCount();
 	}
 
 	@Override
